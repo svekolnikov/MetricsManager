@@ -5,6 +5,8 @@ namespace MetricsManager.Data
 {
     public interface IValueHolder
     {
-        
+        public List<ForecastModel> Values { get; set; }
+        public void Add(ForecastModel model);
+        public ForecastModel Get();
     }
 }
