@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using MetricsManager.Data;
 using MetricsManager.Models;
 
@@ -51,10 +48,14 @@ namespace MetricsManager.Controllers
         [HttpDelete("deleteRange")]
         public IActionResult DeleteRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
-            var range = _holder.Values
-                .Where(model =>
-                    model.Date >= startDate &&
-                    model.Date <= endDate);
+            _holder.Values =_holder.Values.OrderBy(x => x.Date).ToList();
+
+            var start = _holder.Values
+                .FindIndex(model => model.Date == startDate);
+            var end = _holder.Values
+                .FindIndex(model => model.Date == endDate);
+
+            _holder.Values.RemoveRange(start, end - start + 1);
 
             return Ok();
         }
@@ -70,6 +71,12 @@ namespace MetricsManager.Controllers
                 .ToList();
 
             return Ok(range);
+        }
+
+        [HttpGet("read")]
+        public IActionResult GetAll()
+        {
+            return Ok(_holder.Values);
         }
     }
 }
