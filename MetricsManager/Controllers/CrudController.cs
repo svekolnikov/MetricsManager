@@ -32,8 +32,7 @@ namespace MetricsManager.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromQuery] DateTime date, [FromQuery] int value)
         {
-            var forecast = _holder.Values.FirstOrDefault(x =>
-                DateTime.Compare(x.Date, date) == 0);
+            var forecast = _holder.Values.FirstOrDefault(x => x.Date == date);
 
             if (forecast == null)
             {
@@ -50,12 +49,14 @@ namespace MetricsManager.Controllers
         {
             _holder.Values =_holder.Values.OrderBy(x => x.Date).ToList();
 
-            var start = _holder.Values
-                .FindIndex(model => model.Date == startDate);
-            var end = _holder.Values
-                .FindIndex(model => model.Date == endDate);
+            var range = _holder.Values
+                .Where(model =>
+                    model.Date >= startDate &&
+                    model.Date <= endDate)
+                .OrderBy(model => model.Date)
+                .ToList();
 
-            _holder.Values.RemoveRange(start, end - start + 1);
+            _holder.Values = _holder.Values.Except(range).ToList();
 
             return Ok();
         }
