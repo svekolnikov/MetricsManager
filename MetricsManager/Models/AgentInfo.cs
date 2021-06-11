@@ -4,7 +4,7 @@ namespace MetricsManager.Models
 {
     public class AgentInfo
     {
-        public int AgentId { get; }
-        public Uri AgentAddress { get; }
+        public int AgentId { get; set; }
+        public Uri AgentAddress { get; set; }
     }
 }
