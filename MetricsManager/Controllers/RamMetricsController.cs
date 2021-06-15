@@ -8,9 +8,9 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class RamMetricsController : ControllerBase
     {
-        private readonly ILogger<CpuMetricsController> _logger;
+        private readonly ILogger<RamMetricsController> _logger;
 
-        public RamMetricsController(ILogger<CpuMetricsController> logger)
+        public RamMetricsController(ILogger<RamMetricsController> logger)
         {
             _logger = logger;
         }

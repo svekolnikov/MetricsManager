@@ -8,9 +8,9 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class AgentsController : ControllerBase
     {
-        private readonly ILogger<CpuMetricsController> _logger;
+        private readonly ILogger<AgentsController> _logger;
 
-        public AgentsController(ILogger<CpuMetricsController> logger)
+        public AgentsController(ILogger<AgentsController> logger)
         {
             _logger = logger;
         }

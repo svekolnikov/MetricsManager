@@ -8,9 +8,9 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class DotNetMetricsController : ControllerBase
     {
-        private readonly ILogger<CpuMetricsController> _logger;
+        private readonly ILogger<DotNetMetricsController> _logger;
 
-        public DotNetMetricsController(ILogger<CpuMetricsController> logger)
+        public DotNetMetricsController(ILogger<DotNetMetricsController> logger)
         {
             _logger = logger;
         }

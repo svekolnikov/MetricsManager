@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using MetricsManager.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace MetricsManager.Tests
@@ -10,9 +10,12 @@ namespace MetricsManager.Tests
     public class RamMetricsControllerTests
     {
         private RamMetricsController _controller;
+        private Mock<ILogger<RamMetricsController>> _mockLogger;
+
         public RamMetricsControllerTests()
         {
-            _controller = new RamMetricsController();
+            _mockLogger = new Mock<ILogger<RamMetricsController>>();
+            _controller = new RamMetricsController(_mockLogger.Object);
         }
 
         [Fact]

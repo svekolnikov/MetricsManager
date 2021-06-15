@@ -1,7 +1,10 @@
 ﻿using System;
+using Castle.Core.Logging;
 using MetricsManager.Controllers;
 using MetricsManager.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace MetricsManager.Tests
@@ -9,9 +12,12 @@ namespace MetricsManager.Tests
     public class AgentsControllerTests
     {
         private AgentsController _controller;
+        private Mock<ILogger<AgentsController>> _mockLogger;
+
         public AgentsControllerTests()
         {
-            _controller = new AgentsController();
+            _mockLogger = new Mock<ILogger<AgentsController>>();
+            _controller = new AgentsController(_mockLogger.Object);
         }
 
         [Fact]
