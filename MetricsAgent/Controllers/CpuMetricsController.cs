@@ -28,6 +28,7 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation($"{fromTime},{toTime}");
             var result = _repository.GetByTimePeriod(fromTime, toTime);
+
             return Ok(result);
         }
 
