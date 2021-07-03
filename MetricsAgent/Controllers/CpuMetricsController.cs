@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using MetricsAgent.DAL.Interfaces;
-using MetricsAgent.DTO;
-using MetricsAgent.Requests;
+using System.Threading.Tasks;
+using MediatR;
+using MetricsAgent.Core.Commands;
+using MetricsAgent.Core.Queries;
 using MetricsAgent.Responses;
-using Microsoft.Extensions.Logging;
 
 namespace MetricsAgent.Controllers
 {
@@ -13,33 +13,41 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
-        private readonly ILogger<CpuMetricsController> _logger;
-        private readonly ICpuMetricsRepository _repository;
+        private readonly IMediator _mediator;
 
-        public CpuMetricsController(ILogger<CpuMetricsController> logger, ICpuMetricsRepository repository)
+        public CpuMetricsController(IMediator mediator)
         {
-            _logger = logger;
-            _repository = repository;
+            _mediator = mediator;
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetrics([FromRoute] DateTimeOffset fromTime, 
+        public async Task<IActionResult> GetMetrics([FromRoute] DateTimeOffset fromTime, 
             [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"{fromTime},{toTime}");
-            var result = _repository.GetByTimePeriod(fromTime, toTime);
-
+            var result = new List<CpuMetricDto>();
+            try
+            {
+                var query = new CpuGetMetricsQuery { FromTime = fromTime, ToTime = toTime };
+                result = await _mediator.Send(query);
+            }
+            catch (Exception e)
+            {
+                BadRequest(e);
+            }
             return Ok(result);
         }
 
         [HttpPost("create")]
-        public IActionResult Create([FromBody] CpuMetricCreateRequest request)
+        public IActionResult Create([FromBody] CpuMetricsCreateCommand command)
         {
-            _repository.Create(new CpuMetric
+            try
             {
-                Time = request.Time,
-                Value = request.Value
-            });
+                _mediator.Send(command);
+            }
+            catch (Exception e)
+            {
+                BadRequest(e);
+            }
             return Ok();
         }
     }

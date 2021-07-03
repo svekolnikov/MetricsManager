@@ -1,4 +1,4 @@
-﻿using MetricsAgent.DTO;
+﻿using MetricsAgent.DAL.Models;
 
 namespace MetricsAgent.DAL.Interfaces
 {

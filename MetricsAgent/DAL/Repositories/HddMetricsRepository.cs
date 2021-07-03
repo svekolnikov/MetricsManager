@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using MetricsAgent.DAL.Interfaces;
-using MetricsAgent.DTO;
+using MetricsAgent.DAL.Models;
 
-namespace MetricsAgent.DAL
+namespace MetricsAgent.DAL.Repositories
 {
     public class HddMetricsRepository : IHddMetricRepository
 

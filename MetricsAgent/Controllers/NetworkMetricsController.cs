@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using MetricsAgent.DAL.Interfaces;
-using MetricsAgent.DTO;
-using MetricsAgent.Requests;
-using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MediatR;
+using MetricsAgent.Core.Queries;
+using MetricsAgent.Responses;
 
 namespace MetricsAgent.Controllers
 {
@@ -11,32 +12,27 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class NetworkMetricsController : ControllerBase
     {
-        private readonly ILogger<NetworkMetricsController> _logger;
-        private readonly INetworkMetricRepository _repository;
+        private readonly IMediator _mediator;
 
-        public NetworkMetricsController(ILogger<NetworkMetricsController> logger,INetworkMetricRepository repository)
+        public NetworkMetricsController(IMediator mediator)
         {
-            _logger = logger;
-            _repository = repository;
+            _mediator = mediator;
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetrics([FromRoute]DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        public async Task<IActionResult> GetMetrics([FromRoute]DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"{fromTime},{toTime}");
-            var result = _repository.GetByTimePeriod(fromTime, toTime);
-            return Ok(result);
-        }
-
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] NetworkMetricCreateRequest request)
-        {
-            _repository.Create(new NetworkMetric
+            var result = new List<NetworkMetricDto>();
+            try
             {
-                Time = request.Time,
-                Value = request.Value
-            });
-            return Ok();
+                var query = new NetworkGetMetricsQuery { FromTime = fromTime, ToTime = toTime };
+                result = await _mediator.Send(query);
+            }
+            catch (Exception e)
+            {
+                BadRequest(e);
+            }
+            return Ok(result);
         }
     }
 }

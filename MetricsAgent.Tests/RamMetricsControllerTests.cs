@@ -1,8 +1,14 @@
 ﻿using System;
-using MetricsAgent.Controllers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using MetricsAgent.Core.Handlers;
+using MetricsAgent.Core.Queries;
 using MetricsAgent.DAL.Interfaces;
-using MetricsAgent.DTO;
-using Microsoft.AspNetCore.Mvc;
+using MetricsAgent.DAL.Models;
+using MetricsAgent.Mapping;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -11,42 +17,56 @@ namespace MetricsAgent.Tests
 {
     public class RamMetricsControllerTests
     {
-        private RamMetricsController _controller;
-        private Mock<ILogger<RamMetricsController>> _mockLogger;
-        private Mock<IRamMetricRepository> _mockRepo;
+        private readonly Mock<ILogger<RamGetMetricsHandler>> _mockLogger;
+        private readonly Mock<IRamMetricRepository> _mockRepository;
+        private static IMapper _mapper;
 
         public RamMetricsControllerTests()
         {
-            _mockLogger = new Mock<ILogger<RamMetricsController>>();
-            _mockRepo = new Mock<IRamMetricRepository>();
-            _controller = new RamMetricsController(_mockLogger.Object,_mockRepo.Object);
+            _mockLogger = new Mock<ILogger<RamGetMetricsHandler>>();
+            _mockRepository = new Mock<IRamMetricRepository>();
+
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MapperProfile());
+            });
+            var mapper = mappingConfig.CreateMapper();
+            _mapper = mapper;
         }
 
         [Fact]
-        public void Create_ShouldCall_Create_From_Repository()
-        {
-            _mockRepo.Setup(repository =>
-                repository.Create(It.IsAny<RamMetric>())).Verifiable();
-            var result = _controller.Create(new
-                MetricsAgent.Requests.RamMetricCreateRequest
-                {
-                    Time = DateTimeOffset.FromUnixTimeSeconds(1),
-                    Value = 50
-                });
-            _mockRepo.Verify(repository => repository.Create(It.IsAny<RamMetric>()),
-                Times.AtMostOnce());
-        }
-
-        [Fact]
-        public void GetRamAvailable_ReturnsOk()
+        public async Task GetMetrics_ReturnsOkAsync()
         {
             //Arrange
-            var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
-            var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
+            var models = new List<RamMetric>
+            {
+                new RamMetric
+                {
+                    Value = 10,
+                    Time = DateTimeOffset.FromUnixTimeSeconds(10)
+                }
+            };
+            _mockRepository.Setup(repository =>
+                    repository.GetByTimePeriod(
+                        It.IsAny<DateTimeOffset>(),
+                        It.IsAny<DateTimeOffset>()))
+                .Returns(models)
+                .Verifiable();
+
+            var query = new RamGetMetricsQuery
+            {
+                FromTime = DateTimeOffset.FromUnixTimeSeconds(0),
+                ToTime = DateTimeOffset.FromUnixTimeSeconds(100)
+            };
+
+            var handler = new RamGetMetricsHandler(_mockRepository.Object, _mockLogger.Object, _mapper);
+
             //Act
-            var result = _controller.GetRamAvailable(fromTime, toTime);
-            // Assert
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            var dtos = await handler.Handle(query, CancellationToken.None);
+
+            //Assert
+            Assert.Equal(models.Select(x => x.Value), dtos.Select(x => x.Value));
+            Assert.Equal(models.Select(x => x.Time), dtos.Select(x => x.Time));
         }
     }
 }

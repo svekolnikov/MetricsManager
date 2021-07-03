@@ -1,9 +1,10 @@
 ﻿using System;
-using MetricsAgent.DAL.Interfaces;
-using MetricsAgent.DTO;
-using MetricsAgent.Requests;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MediatR;
+using MetricsAgent.Core.Queries;
+using MetricsAgent.Responses;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace MetricsAgent.Controllers
 {
@@ -11,32 +12,27 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class RamMetricsController :ControllerBase
     {
-        private readonly ILogger<RamMetricsController> _logger;
-        private readonly IRamMetricRepository _repository;
+        private readonly IMediator _mediator;
 
-        public RamMetricsController(ILogger<RamMetricsController> logger, IRamMetricRepository repository)
+        public RamMetricsController(IMediator mediator)
         {
-            _logger = logger;
-            _repository = repository;
+            _mediator = mediator;
         }
 
         [HttpGet("available/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetRamAvailable([FromRoute]DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        public async Task<IActionResult> GetMetrics([FromRoute]DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"{fromTime},{toTime}");
-            var result = _repository.GetByTimePeriod(fromTime, toTime);
-            return Ok(result);
-        }
-
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] RamMetricCreateRequest request)
-        {
-            _repository.Create(new RamMetric
+            var result = new List<RamMetricDto>();
+            try
             {
-                Time = request.Time,
-                Value = request.Value
-            });
-            return Ok();
+                var query = new RamGetMetricsQuery { FromTime = fromTime, ToTime = toTime };
+                result = await _mediator.Send(query);
+            }
+            catch (Exception e)
+            {
+                BadRequest(e);
+            }
+            return Ok(result);
         }
     }
 }

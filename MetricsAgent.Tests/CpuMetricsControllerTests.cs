@@ -1,52 +1,73 @@
-using MetricsAgent.Controllers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using MetricsAgent.Core.Handlers;
+using MetricsAgent.Core.Queries;
 using MetricsAgent.DAL.Interfaces;
-using MetricsAgent.DTO;
-using Microsoft.AspNetCore.Mvc;
+using MetricsAgent.DAL.Models;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using MetricsAgent.Mapping;
 
 namespace MetricsAgent.Tests
 {
     public class CpuMetricsControllerTests
     {
-        private CpuMetricsController _controller;
-        private Mock<ILogger<CpuMetricsController>> _mockLogger;
-        private Mock<ICpuMetricsRepository> _mockRepo;
+        private readonly Mock<ILogger<CpuGetMetricsHandler>> _mockLogger;
+        private readonly Mock<ICpuMetricsRepository> _mockRepository;
+        private static IMapper _mapper;
 
         public CpuMetricsControllerTests()
         {
-            _mockLogger = new Mock<ILogger<CpuMetricsController>>();
-            _mockRepo = new Mock<ICpuMetricsRepository>();
-            _controller = new CpuMetricsController(_mockLogger.Object, _mockRepo.Object);
+            _mockLogger = new Mock<ILogger<CpuGetMetricsHandler>>();
+            _mockRepository = new Mock<ICpuMetricsRepository>();
+
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MapperProfile());
+            });
+            var mapper = mappingConfig.CreateMapper();
+            _mapper = mapper;
         }
 
+
         [Fact]
-        public void Create_ShouldCall_Create_From_Repository()
-        {
-            _mockRepo.Setup(repository =>
-                repository.Create(It.IsAny<CpuMetric>())).Verifiable();
-            var result = _controller.Create(new
-                MetricsAgent.Requests.CpuMetricCreateRequest
-                {
-                    Time = DateTimeOffset.FromUnixTimeSeconds(1),
-                    Value = 50
-                });
-            _mockRepo.Verify(repository => repository.Create(It.IsAny<CpuMetric>()),
-                Times.AtMostOnce());
-        }
-    
-        [Fact]
-        public void GetMetrics_ReturnsOk()
+        public async Task GetMetrics_ReturnsOkAsync()
         {
             //Arrange
-            var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
-            var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
+            var models = new List<CpuMetric>
+            {
+                new CpuMetric
+                {
+                    Value = 10,
+                    Time = DateTimeOffset.FromUnixTimeSeconds(10)
+                }
+            };
+            _mockRepository.Setup(repository =>
+                    repository.GetByTimePeriod(
+                        It.IsAny<DateTimeOffset>(),
+                        It.IsAny<DateTimeOffset>()))
+                .Returns(models)
+                .Verifiable();
+
+            var query = new CpuGetMetricsQuery
+            {
+                FromTime = DateTimeOffset.FromUnixTimeSeconds(0),
+                ToTime = DateTimeOffset.FromUnixTimeSeconds(100)
+            };
+
+            var handler = new CpuGetMetricsHandler(_mockRepository.Object, _mockLogger.Object, _mapper);
+
             //Act
-            var result = _controller.GetMetrics(fromTime, toTime);
-            // Assert
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            var dtos = await handler.Handle(query, CancellationToken.None);
+
+            //Assert
+            Assert.Equal(models.Select(x => x.Value), dtos.Select(x => x.Value));
+            Assert.Equal(models.Select(x => x.Time), dtos.Select(x => x.Time));
         }
     }
 }

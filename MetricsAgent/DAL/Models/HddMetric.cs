@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace MetricsAgent.DTO
+namespace MetricsAgent.DAL.Models
 {
-    public class CpuMetric
+    public class HddMetric
     {
         public int Id { get; set; }
         public int Value { get; set; }
