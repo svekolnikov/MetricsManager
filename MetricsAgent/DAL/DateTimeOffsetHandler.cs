@@ -13,7 +13,7 @@ namespace MetricsAgent.DAL
 
         public override DateTimeOffset Parse(object value)
         {
-            return DateTimeOffset.FromUnixTimeSeconds((int)value); 
+            return DateTimeOffset.FromUnixTimeSeconds((Int64)value); 
         }
     }
 }
