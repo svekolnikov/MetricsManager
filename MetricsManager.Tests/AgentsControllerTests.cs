@@ -1,7 +1,7 @@
 ﻿using System;
 using Castle.Core.Logging;
 using MetricsManager.Controllers;
-using MetricsManager.Models;
+using MetricsManager.DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;

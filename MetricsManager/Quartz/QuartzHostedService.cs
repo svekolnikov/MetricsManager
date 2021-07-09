@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
 
-namespace MetricsAgent.Quartz
+namespace MetricsManager.Quartz
 {
     public class QuartzHostedService : IHostedService
     {

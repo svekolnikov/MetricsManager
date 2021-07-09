@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MetricsManager.Models;
+﻿using MetricsManager.DAL.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace MetricsManager.Controllers

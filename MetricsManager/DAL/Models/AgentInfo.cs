@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MetricsManager.Models
+namespace MetricsManager.DAL.Models
 {
     public class AgentInfo
     {
