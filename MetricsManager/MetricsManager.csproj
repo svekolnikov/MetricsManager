@@ -23,14 +23,5 @@
     <Content Update="nlog.config" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Core\Queries\" />
-    <Folder Include="Core\Handlers\" />
-    <Folder Include="DAL\Interfaces\" />
-    <Folder Include="DAL\Migrations\" />
-    <Folder Include="DAL\Repositories\" />
-    <Folder Include="Quartz\Jobs\" />
-  </ItemGroup>
-
 
 </Project>

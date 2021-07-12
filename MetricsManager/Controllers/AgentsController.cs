@@ -16,9 +16,9 @@ namespace MetricsManager.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
+        public IActionResult RegisterAgent([FromBody] Agent agent)
         {
-            _logger.LogInformation($"{agentInfo.AgentId},{agentInfo.AgentAddress}");
+            _logger.LogInformation($"{agent.Id},{agent.Url}");
             return Ok();
         }
         [HttpPut("enable/{agentId}")]

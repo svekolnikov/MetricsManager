@@ -24,10 +24,10 @@ namespace MetricsManager.Tests
         public void RegisterAgent_ReturnsOk()
         {
             //Arrange
-            var agentInfo = new AgentInfo
+            var agentInfo = new Agent
             {
-                AgentId = 1,
-                AgentAddress = new Uri("http://localhost:5000/api/metrics/cpu/from/1/to/2")
+                Id = 1,
+                Url = new Uri("http://localhost:5000/api/metrics/cpu/from/1/to/2")
             };
 
             //Act

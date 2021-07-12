@@ -1,14 +1,15 @@
-﻿using MetricsManager.Requests;
+﻿using System.Collections.Generic;
+using MetricsManager.Requests;
 using MetricsManager.Responses;
 
 namespace MetricsManager.Client
 {
     public interface IMetricsAgentClient
     {
-        AllCpuMetricsApiResponse GetCpuMetrics(GetAllCpuMetricsApiRequest request);
-        AllDotNetMetricsApiResponse GetDonNetMetrics(GetAllDotNetMetrisApiRequest request);
-        AllHddMetricsApiResponse GetAllHddMetrics(GetAllHddMetricsApiRequest request);
-        AllNetworkMetricsApiResponse GetAllNetworkMetrics(GetAllNetworkMetricsApiRequest request);
-        AllRamMetricsApiResponse GetAllRamMetrics(GetAllRamMetricsApiRequest request);
+        List<CpuMetricsApiResponse> GetAllCpuMetrics(GetAllCpuMetricsApiRequest request);
+        DotNetMetricsApiResponse GetAllDonNetMetrics(GetAllDotNetMetrisApiRequest request);
+        HddMetricsApiResponse GetAllHddMetrics(GetAllHddMetricsApiRequest request);
+        NetworkMetricsApiResponse GetAllNetworkMetrics(GetAllNetworkMetricsApiRequest request);
+        RamMetricsApiResponse GetAllRamMetrics(GetAllRamMetricsApiRequest request);
     }
 }
