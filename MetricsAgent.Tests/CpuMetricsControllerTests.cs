@@ -34,7 +34,6 @@ namespace MetricsAgent.Tests
             _mapper = mapper;
         }
 
-
         [Fact]
         public async Task GetMetrics_ReturnsOkAsync()
         {

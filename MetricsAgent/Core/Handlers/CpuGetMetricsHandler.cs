@@ -26,7 +26,8 @@ namespace MetricsAgent.Core.Handlers
             _logger = logger;
             _mapper = mapper;
         }
-        
+
+        // если реализую RequestHandler , то  метод Handle protected и не доступен в тестах 
         public async Task<List<CpuMetricDto>> Handle(CpuGetMetricsQuery request, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{request.FromTime},{request.ToTime}");

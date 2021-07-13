@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
-using MetricsAgent.Core.Commands;
 using MetricsAgent.Core.Queries;
 using MetricsAgent.Responses;
 
@@ -21,7 +20,7 @@ namespace MetricsAgent.Controllers
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
-        public async Task<IActionResult> GetMetrics([FromRoute] DateTimeOffset fromTime, 
+        public async Task<IActionResult> GetMetrics([FromRoute] DateTimeOffset fromTime,
             [FromRoute] DateTimeOffset toTime)
         {
             var result = new List<CpuMetricDto>();
@@ -35,20 +34,6 @@ namespace MetricsAgent.Controllers
                 BadRequest(e);
             }
             return Ok(result);
-        }
-
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] CpuMetricsCreateCommand command)
-        {
-            try
-            {
-                _mediator.Send(command);
-            }
-            catch (Exception e)
-            {
-                BadRequest(e);
-            }
-            return Ok();
         }
     }
 }
