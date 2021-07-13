@@ -7,9 +7,9 @@ namespace MetricsManager.Client
     public interface IMetricsAgentClient
     {
         List<CpuMetricsApiResponse> GetAllCpuMetrics(GetAllCpuMetricsApiRequest request);
-        DotNetMetricsApiResponse GetAllDonNetMetrics(GetAllDotNetMetrisApiRequest request);
-        HddMetricsApiResponse GetAllHddMetrics(GetAllHddMetricsApiRequest request);
-        NetworkMetricsApiResponse GetAllNetworkMetrics(GetAllNetworkMetricsApiRequest request);
-        RamMetricsApiResponse GetAllRamMetrics(GetAllRamMetricsApiRequest request);
+        List<DotNetMetricsApiResponse> GetAllDotNetMetrics(GetAllDotNetMetrisApiRequest request);
+        List<HddMetricsApiResponse> GetAllHddMetrics(GetAllHddMetricsApiRequest request);
+        List<NetworkMetricsApiResponse> GetAllNetworkMetrics(GetAllNetworkMetricsApiRequest request);
+        List<RamMetricsApiResponse> GetAllRamMetrics(GetAllRamMetricsApiRequest request);
     }
 }

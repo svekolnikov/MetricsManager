@@ -12,20 +12,20 @@ using Quartz;
 
 namespace MetricsManager.Quartz.Jobs
 {
-    public class CpuMetricJob : IJob
+    public class NetworkMetricJob : IJob
     {
-        private readonly ICpuMetricsRepository _cpuMetricsRepository;
+        private readonly INetworkMetricsRepository _networkMetricsRepository;
         private readonly IMetricsAgentClient _client;
         private readonly IMapper _mapper;
-        private readonly ILogger<CpuMetricJob> _logger;
+        private readonly ILogger<NetworkMetricJob> _logger;
 
-        public CpuMetricJob(
-            ICpuMetricsRepository cpuMetricsRepository,
+        public NetworkMetricJob(
+            INetworkMetricsRepository networkMetricsRepository,
             IMetricsAgentClient client,
             IMapper mapper,
-            ILogger<CpuMetricJob> logger)
+            ILogger<NetworkMetricJob> logger)
         {
-            _cpuMetricsRepository = cpuMetricsRepository;
+            _networkMetricsRepository = networkMetricsRepository;
             _client = client;
             _mapper = mapper;
             _logger = logger;
@@ -34,31 +34,31 @@ namespace MetricsManager.Quartz.Jobs
         public Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation($"starting new request to metrics agent");
-            
+
             var agentId = 1;
             var uri = new Uri("http://localhost:5000");
 
-            var metricsByAgentId = _cpuMetricsRepository.GetByAgentId(agentId);
+            var metricsByAgentId = _networkMetricsRepository.GetByAgentId(agentId);
             var lastTime = DateTimeOffset.MinValue;
             if (metricsByAgentId.Count > 0)
             {
-               lastTime = metricsByAgentId.Select(metric => metric.Time).Max();
+                lastTime = metricsByAgentId.Select(metric => metric.Time).Max();
             }
 
-            var metrics = _client.GetAllCpuMetrics(new GetAllCpuMetricsApiRequest
+            var metrics = _client.GetAllNetworkMetrics(new GetAllNetworkMetricsApiRequest
             {
                 FromTime = lastTime,
                 ToTime = DateTimeOffset.UtcNow,
                 Uri = uri
             });
 
-            var models = new List<CpuMetric>();
+            var models = new List<NetworkMetric>();
             foreach (var metricsApiResponse in metrics)
             {
-                models.Add(_mapper.Map<CpuMetric>(metricsApiResponse));
+                models.Add(_mapper.Map<NetworkMetric>(metricsApiResponse));
                 models[^1].AgentId = agentId;
             }
-            _cpuMetricsRepository.AddRange(models);
+            _networkMetricsRepository.AddRange(models);
 
             return Task.CompletedTask;
         }
