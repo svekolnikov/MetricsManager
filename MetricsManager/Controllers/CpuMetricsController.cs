@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MediatR;
+using MetricsManager.Core.Queries;
+using MetricsManager.Responses;
 
 namespace MetricsManager.Controllers
 {
@@ -8,26 +12,27 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
-        private readonly ILogger<CpuMetricsController> _logger;
+        private readonly IMediator _mediator;
 
-        public CpuMetricsController(ILogger<CpuMetricsController> logger)
+        public CpuMetricsController(IMediator mediator)
         {
-            _logger = logger;
+            _mediator = mediator;
         }
 
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute]
-            TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        public async Task<IActionResult> GetMetricsFromAgent([FromRoute] CpuGetMetricsFromAgentQuery query)
         {
-            _logger.LogInformation($"{agentId},{fromTime},{toTime}");
-            return Ok();
-        }
-        [HttpGet("cluster/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAllCluster([FromRoute] TimeSpan fromTime,
-            [FromRoute] TimeSpan toTime)
-        {
-            _logger.LogInformation($"{fromTime},{toTime}");
-            return Ok();
+            var result = new List<CpuMetricsApiResponse>();
+            try
+            {
+                result = await _mediator.Send(query);
+            }
+            catch (Exception e)
+            {
+                BadRequest(e);
+            }
+
+            return Ok(result);
         }
     }
 }

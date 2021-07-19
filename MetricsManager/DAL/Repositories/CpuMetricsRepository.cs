@@ -1,43 +1,52 @@
-﻿using System;
+﻿using MetricsManager.DAL.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using Dapper;
-using MetricsAgent.DAL.Interfaces;
-using MetricsAgent.DAL.Models;
+using MetricsManager.DAL.Interfaces;
 using Microsoft.Extensions.Configuration;
 
-namespace MetricsAgent.DAL.Repositories
+namespace MetricsManager.DAL.Repositories
 {
     public class CpuMetricsRepository : ICpuMetricsRepository
     {
-        // инжектируем соединение с базой данных в наш репозиторий через конструктор
         private readonly string _connectionString;
         private readonly string _tableName = "cpumetrics";
 
         public CpuMetricsRepository(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("default");
-            // добавляем парсилку типа TimeSpan в качестве подсказки для SQLite
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
         }
 
         public void Create(CpuMetric item)
         {
             using var connection = new SQLiteConnection(_connectionString);
-            // запрос на вставку данных с плейсхолдерами для параметров
-            connection.Execute($"INSERT INTO {_tableName}(value, time)VALUES(@value, @time)",
-                // анонимный объект с параметрами запроса
+            connection.Execute($"INSERT INTO {_tableName}(value, time, agentid)VALUES(@value, @time, @agentid)",
                 new
                 {
-                    // value подставится на место "@value" в строке запроса
-                    // значение запишется из поля Value объекта item
                     value = item.Value,
-                    // записываем в поле time количество секунд
-                    time = item.Time.ToUnixTimeSeconds()
+                    time = item.Time.ToUnixTimeSeconds(),
+                    agentid = item.AgentId
                 });
         }
-        
+
+        public void AddRange(List<CpuMetric> items)
+        {
+            using var connection = new SQLiteConnection(_connectionString);
+            foreach (var metric in items)
+            {
+                connection.Execute($"INSERT INTO {_tableName}(value, time, agentid)VALUES(@value, @time, @agentid)",
+                    new
+                    {
+                        value = metric.Value,
+                        time = metric.Time.ToUnixTimeSeconds(),
+                        agentid = metric.AgentId
+                    });
+            }
+        }
+
         public void Delete(int id)
         {
             using var connection = new SQLiteConnection(_connectionString);
@@ -64,9 +73,6 @@ namespace MetricsAgent.DAL.Repositories
         public IList<CpuMetric> GetAll()
         {
             using var connection = new SQLiteConnection(_connectionString);
-            // читаем при помощи Query и в шаблон подставляем тип данных
-            // объект которого Dapper сам и заполнит его поля
-            // в соответсвии с названиями колонок
             return connection.Query<CpuMetric>($"SELECT Id, Time, Value FROM {_tableName}").ToList();
         }
 
@@ -77,14 +83,27 @@ namespace MetricsAgent.DAL.Repositories
                 new { id = id });
         }
 
-        public IList<CpuMetric> GetByTimePeriod(DateTimeOffset fromTime, DateTimeOffset toTime)
+        public IList<CpuMetric> GetByAgentId(int agentid)
         {
             var connection = new SQLiteConnection(_connectionString);
             var query = connection
-                .QueryAsync<CpuMetric>($"SELECT id, value, time FROM cpumetrics " +
-                                                    $"WHERE time>@fromTime AND time<@toTime",
+                .QueryAsync<CpuMetric>($"SELECT Id, Time, Value, AgentId FROM {_tableName} WHERE agentid = @agentid",
+                    new
+                    {
+                        agentid = agentid
+                    }).Result.ToList();
+            return query;
+        }
+
+        public IList<CpuMetric> GetByTimePeriod(int agentId, DateTimeOffset fromTime, DateTimeOffset toTime)
+        {
+            var connection = new SQLiteConnection(_connectionString);
+            var query = connection
+                .QueryAsync<CpuMetric>($"SELECT Id, Time, Value, AgentId FROM {_tableName} " +
+                                       $"WHERE time>@fromTime AND time<@toTime AND agentid = @agentid",
                 new
                 {
+                    agentid = agentId,
                     fromTime = fromTime.ToUnixTimeSeconds(),
                     toTime = toTime.ToUnixTimeSeconds()
                 }).Result.ToList();
