@@ -101,7 +101,7 @@ namespace MetricsManager.DAL.Repositories
             var connection = new SQLiteConnection(_connectionString);
             var query = connection
                 .QueryAsync<RamMetric>($"SELECT Id, Time, Value, AgentId FROM {_tableName} " +
-                                       $"WHERE time>@fromTime AND time<@toTime AND agentid = @agentid",
+                                       $"WHERE time>@FromTime AND time<@ToTime AND agentid = @agentid",
                 new
                 {
                     agentid = agentId,

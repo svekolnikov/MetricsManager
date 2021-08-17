@@ -19,7 +19,7 @@ namespace MetricsManager.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
+        [HttpGet("agent/{AgentId}/from/{FromTime}/to/{ToTime}")]
         public async Task<IActionResult> GetMetricsFromAgent([FromRoute] HddGetMetricsFromAgentQuery query)
         {
             var result = new List<HddMetricsApiResponse>();

@@ -21,13 +21,13 @@ namespace MetricsManager.Controllers
             _logger.LogInformation($"{agent.Id},{agent.Url}");
             return Ok();
         }
-        [HttpPut("enable/{agentId}")]
+        [HttpPut("enable/{AgentId}")]
         public IActionResult EnableAgentById([FromRoute] int agentId)
         {
             _logger.LogInformation($"{agentId}");
             return Ok();
         }
-        [HttpPut("disable/{agentId}")]
+        [HttpPut("disable/{AgentId}")]
         public IActionResult DisableAgentById([FromRoute] int agentId)
         {
             _logger.LogInformation($"{agentId}");
